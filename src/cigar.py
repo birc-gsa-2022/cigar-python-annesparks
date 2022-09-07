@@ -1,16 +1,17 @@
+from typing import Tuple, List
 """A module for translating between edit strings and cigar strings."""
 
 import re
 
 
-def split_pairs(cigar: str) -> list[tuple[int, str]]:
-    """Split a CIGAR string into a list of integer-operation pairs.
+def split_pairs(cigar: str) -> List[Tuple[int, str]]:
+    """Split a CIGAR string into a List of integer-operation pairs.
 
     Args:
         cigar (str): A CIGAR string
 
     Returns:
-        list[tuple[int, str]]: A list of pairs, where the first element is
+        List[Tuple[int, str]]: A List of pairs, where the first element is
         an integer and the second an edit operation.
 
     >>> split_pairs("1M1D6M1I4M")
@@ -25,7 +26,7 @@ def split_pairs(cigar: str) -> list[tuple[int, str]]:
 
 
 def cigar_to_edits(cigar: str) -> str:
-    """Expand the compressed CIGAR encoding into the full list of edits.
+    """Expand the compressed CIGAR encoding into the full List of edits.
 
     Args:
         cigar (str): A CIGAR string
@@ -37,18 +38,17 @@ def cigar_to_edits(cigar: str) -> str:
     'MDMMMMMMIMMMM'
 
     """
-    # FIXME: construct the edits sequence
-    return ""
+    return "".join(c * n for (c, n) in split_pairs(cigar))
 
 
-def split_blocks(x: str) -> list[str]:
+def split_blocks(x: str) -> List[str]:
     """Split a string into blocks of equal character.
 
     Args:
         x (str): A string, but we sorta think it would be edits.
 
     Returns:
-        list[str]: A list of blocks.
+        List[str]: A List of blocks.
 
     >>> split_blocks('MDMMMMMMIMMMM')
     ['M', 'D', 'MMMMMM', 'I', 'MMMM']
@@ -73,5 +73,4 @@ def edits_to_cigar(edits: str) -> str:
     '1M1D6M1I4M'
 
     """
-    # FIXME: Compute the cigar
-    return ''
+    return "".join(str(len(b)) + b[0] for b in split_blocks(edits))
