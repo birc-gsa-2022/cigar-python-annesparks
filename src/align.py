@@ -1,7 +1,8 @@
+from typing import Tuple
 """A module for translating between alignments and edits sequences."""
 
 
-def get_edits(p: str, q: str) -> tuple[str, str, str]:
+def get_edits(p: str, q: str) -> Tuple[str, str, str]:
     """Extract the edit operations from a pairwise alignment.
 
     Args:
@@ -16,11 +17,30 @@ def get_edits(p: str, q: str) -> tuple[str, str, str]:
 
     """
     assert len(p) == len(q)
-    # FIXME: do the actual calculations here
-    return '', '', ''
+
+    out_p = ''
+    out_q = ''
+    edits = ''
+
+    for i in range(len(p)):
+        cp = p[i]
+        cq = q[i]
+        if cp != '-' and cq != '-':
+            out_p += cp
+            out_q += cq
+            edits += 'M'
+        if cp == '-':
+            out_q += cq
+            edits += 'I'
+        if cq == '-':
+            out_p += cp
+            edits += 'D'
 
 
-def local_align(p: str, x: str, i: int, edits: str) -> tuple[str, str]:
+    return out_p, out_q, edits
+
+
+def local_align(p: str, x: str, i: int, edits: str) -> Tuple[str, str]:
     """Align two sequences from a sequence of edits.
 
     Args:
@@ -36,11 +56,10 @@ def local_align(p: str, x: str, i: int, edits: str) -> tuple[str, str]:
     ('ACCACAGT-CATA', 'A-CAGAGTACAAA')
 
     """
-    # FIXME: Compute the alignment rows
-    return '', ''
+    return align(p, x[i:], edits)
 
 
-def align(p: str, q: str, edits: str) -> tuple[str, str]:
+def align(p: str, q: str, edits: str) -> Tuple[str, str]:
     """Align two sequences from a sequence of edits.
 
     Args:
@@ -55,8 +74,28 @@ def align(p: str, q: str, edits: str) -> tuple[str, str]:
     ('ACCACAGT-CATA', 'A-CAGAGTACAAA')
 
     """
-    # FIXME: Compute the alignment rows
-    return '', ''
+    out_p = ''
+    out_q = ''
+    i_p = 0
+    i_q = 0
+
+    for e in edits:
+        if (e == 'M'):
+            out_p += p[i_p]
+            out_q += q[i_q]
+            i_p += 1
+            i_q += 1
+        if (e == 'I'):
+            out_p += '-'
+            out_q += q[i_q]
+            i_q += 1
+        if (e == 'D'):
+            out_p += p[i_p]
+            out_q += '-'
+            i_p += 1
+    
+
+    return out_p, out_q
 
 
 def edit_dist(p: str, x: str, i: int, edits: str) -> int:
@@ -75,5 +114,16 @@ def edit_dist(p: str, x: str, i: int, edits: str) -> int:
     >>> edit_dist("accaaagta", "cgacaaatgtcca", 2, "MDMMIMMMMIIM")
     5
     """
-    # FIXME: Compute the edit distance
-    return -1
+    aligned_p, aligned_q = local_align(p, x, i, edits)
+    dist = 0
+    
+    for i in range (len(aligned_p)):
+        c_p = aligned_p[i]
+        c_q = aligned_q[i]
+        if c_p == '-' or c_q == '-':
+            dist += 1
+        elif c_p != c_q:
+            dist += 1
+        
+
+    return dist
